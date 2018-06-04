@@ -15,6 +15,7 @@ void h2muAnalysis::SetOutput(string outputName)
 {
   m_output = TFile::Open(outputName.c_str(), "recreate");
   // TMVA Booking //
+  /*
   weightXL = std::string(std::getenv("CMSSW_BASE"))+"/src/nano/analysis/test/h2mu/TMVA/newEvent/split/XL_50/weights/TMVAClassification_BDT.weights.xml";
   weightFH = std::string(std::getenv("CMSSW_BASE"))+"/src/nano/analysis/test/h2mu/TMVA/newEvent/split/nFH4_50/weights/TMVAClassification_BDT.weights.xml";
   weightOut = std::string(std::getenv("CMSSW_BASE"))+"/src/nano/analysis/test/h2mu/TMVA/newEvent/split/Out_100/weights/TMVAClassification_BDT.weights.xml";
@@ -101,7 +102,7 @@ void h2muAnalysis::SetOutput(string outputName)
   bdt_noB->AddVariable( "DijetM2", &b_DijetM2 );
   bdt_noB->AddVariable( "DijetEta1", &b_DijetEta1 );
   bdt_noB->AddVariable( "DijetEta2", &b_DijetEta2 );
-  bdt_noB->BookMVA("BDT", weightnoB);
+  bdt_noB->BookMVA("BDT", weightnoB);*/
 
   m_tree = new TTree("events", "events");
   MakeBranch(m_tree);
@@ -147,28 +148,32 @@ void h2muAnalysis::MakeBranch(TTree* t)
   t->Branch("XL", &b_XL, "XL/I");
   t->Branch("Out", &b_Out, "Out/I");
   t->Branch("nonB", &b_nonB, "nonB/I");
+  
+  // B-tagging
   t->Branch("csvweight", "std::vector<float>", &b_csvweights);
   t->Branch("btagweight", &b_btagweight, "btagweight/F");
   t->Branch("btagweight_up", &b_btagweight_up, "btagweight_up/F");
   t->Branch("btagweight_dn", &b_btagweight_dn, "btagweight_dn/F");
-  /*t->Branch("jes_up", &b_jes_up, "jes_up/F");
+  t->Branch("jes_up", &b_jes_up, "jes_up/F");
   t->Branch("jes_dn", &b_jes_dn, "jes_dn/F");
-  t->Branch("cferr1_up", &b_cferr1_up, "cferr1_up/F");
-  t->Branch("cferr1_dn", &b_cferr1_dn, "cferr1_dn/F");
-  t->Branch("cferr2_up", &b_cferr2_up, "cferr2_up/F");
-  t->Branch("cferr2_dn", &b_cferr2_dn, "cferr2_dn/F");
+  t->Branch("lf_up", &b_lf_up, "lf_up/F");
+  t->Branch("lf_dn", &b_lf_dn, "lf_dn/F");
   t->Branch("hf_up", &b_hf_up, "hf_up/F");
   t->Branch("hf_dn", &b_hf_dn, "hf_dn/F");
   t->Branch("hfstats1_up", &b_hfstats1_up, "hfstats1_up/F");
   t->Branch("hfstats1_dn", &b_hfstats1_dn, "hfstats1_dn/F");
   t->Branch("hfstats2_up", &b_hfstats2_up, "hfstats2_up/F");
   t->Branch("hfstats2_dn", &b_hfstats2_dn, "hfstats2_dn/F");
-  t->Branch("lf_up", &b_lf_up, "lf_up/F");
-  t->Branch("lf_dn", &b_lf_dn, "lf_dn/F");
   t->Branch("lfstats1_up", &b_lfstats1_up, "lfstats1_up/F");
   t->Branch("lfstats1_dn", &b_lfstats1_dn, "lfstats1_dn/F");
   t->Branch("lfstats2_up", &b_lfstats2_up, "lfstats2_up/F");
-  t->Branch("lfstats2_dn", &b_lfstats2_dn, "lfstats2_dn/F");*/
+  
+  
+  t->Branch("lfstats2_dn", &b_lfstats2_dn, "lfstats2_dn/F");
+  t->Branch("cferr1_up", &b_cferr1_up, "cferr1_up/F");
+  t->Branch("cferr1_dn", &b_cferr1_dn, "cferr1_dn/F");
+  t->Branch("cferr2_up", &b_cferr2_up, "cferr2_up/F");
+  t->Branch("cferr2_dn", &b_cferr2_dn, "cferr2_dn/F");
   t->Branch("mueffweight", &b_mueffweight, "mueffweight/F");
   t->Branch("mueffweight_up", &b_mueffweight_up, "mueffweight_up/F");
   t->Branch("mueffweight_dn", &b_mueffweight_dn, "mueffweight_dn/F");
@@ -233,6 +238,19 @@ void h2muAnalysis::ResetBranch()
   b_charge = 0;
   b_Met_phi = 0; b_Met = 0;
   b_XL = 0; b_nFH4 = 0; b_Out = 0; b_nonB = 0; 
+  
+  // B-tagging
+  b_btagweight = 1.; b_btagweight_up = 1.; b_btagweight_dn = 1.;
+  b_jes_up = 1.; b_jes_dn = 1.;
+  b_lf_up = 1.; b_lf_dn = 1.;
+  b_hf_up = 1.; b_hf_dn = 1.;
+  b_hfstats1_up = 1.; b_hfstats1_dn = 1.;
+  b_hfstats2_up = 1.; b_hfstats2_dn = 1.;
+  b_lfstats1_up = 1.; b_lfstats1_dn = 1.;
+  b_lfstats2_up = 1.; b_lfstats2_dn = 1.;
+  b_cferr1_up = 1.; b_cferr1_dn = 1.;
+  b_cferr2_up = 1.; b_cferr2_dn = 1.;
+  
   // BDT //
   b_all_muEtaDiff = 0; b_all_muPtDiff = 0; b_all_muPhiDiff = 0; b_all_muDR = 0;
   b_all_Dilep_Pt = 0; b_all_Dilep_Eta = 0; b_all_Dilep_Phi = 0;
@@ -288,17 +306,18 @@ bool h2muAnalysis::Analysis()
   TParticle mu2; 
   b_Met = PuppiMET_pt;
   b_Met_phi = PuppiMET_phi;
-  Bool_t IsoMu24 = false;
-  Bool_t IsoTkMu24 = false;
+  //Bool_t IsoMu24 = false;
+  //Bool_t IsoTkMu24 = false;
 
-  for (UInt_t i = 0; i < nTrigObj; ++i) {
+  /*for (UInt_t i = 0; i < nTrigObj; ++i) {
     if (TrigObj_id[i] != 13) continue;
     if (TrigObj_pt[i] < 24) continue;
     Int_t bits = TrigObj_filterBits[i];
     if (bits & 0x2) IsoMu24 = true;
     if (bits & 0x8) IsoTkMu24 = true;  
-  }
-  if (!(IsoMu24 || IsoTkMu24)) return false; 
+  }*/
+  //if (!(IsoMu24 || IsoTkMu24)) return false; 
+  if (!(b_trig_m)) return false; 
   
   h_cutFlow->Fill(4);
   for (UInt_t i = 0; i < Muons.size(); i++) { 
@@ -472,7 +491,7 @@ bool h2muAnalysis::Analysis()
     }
     h_Non->Fill(0.5, b_nonB);
   }
-
+  
   ////////// BDT //////////////////////////////
   /// BDT Varialbe Set ALL ///
   b_all_muEtaDiff = abs(b_Mu1.Eta() - b_Mu2.Eta());
@@ -482,7 +501,7 @@ bool h2muAnalysis::Analysis()
   b_all_muDR = b_Mu1.DeltaR(b_Mu2);
   b_all_Dilep_Pt = b_Dilep.Pt();   
   b_all_Dilep_Eta = b_Dilep.Eta();   
-  b_all_Dilep_Phi = b_Dilep.Phi();   
+  b_all_Dilep_Phi = b_Dilep.Phi();
 
   for (auto& J : Jets) {
     if (abs(J.Eta()) < 2.4) {
@@ -496,10 +515,10 @@ bool h2muAnalysis::Analysis()
   b_mueffweight_dn = m_muonSF.getScaleFactor(mu1, 13, -1)*m_muonSF.getScaleFactor(mu2, 13, -1);
 
   b_Event_No = 1;
-  b_MVA_BDTXL = bdt_XL->EvaluateMVA("BDT");
+  /*b_MVA_BDTXL = bdt_XL->EvaluateMVA("BDT");
   b_MVA_BDTFH = bdt_FH->EvaluateMVA("BDT");
   b_MVA_BDTnoB = bdt_noB->EvaluateMVA("BDT");
-  b_MVA_BDTOut = bdt_Out->EvaluateMVA("BDT");
+  b_MVA_BDTOut = bdt_Out->EvaluateMVA("BDT");*/
 
   return true;
 }
@@ -621,6 +640,9 @@ vector<TParticle> h2muAnalysis::ElectronSelection(vector<TParticle> leptons)
 vector<TParticle> h2muAnalysis::JetSelection(vector<TParticle> Muons, vector<TParticle> Elecs)
 {
   vector<TParticle> jets;
+  b_btagweight = 1.0;
+  b_btagweight_up = 1.0;
+  b_btagweight_dn = 1.0;
   for (UInt_t i = 0; i < nJet; i++) {
     if (abs(Jet_eta[i]) >= 2.4 &&  Jet_pt[i] < 30) continue;
     if (abs(Jet_eta[i]) < 2.4 &&  Jet_pt[i] < 20) continue;
@@ -637,6 +659,35 @@ vector<TParticle> h2muAnalysis::JetSelection(vector<TParticle> Muons, vector<TPa
     jet.SetMomentum(mom);
     b_Jet_tlv.push_back(mom);
     jets.push_back(jet);
+    if (abs(Jet_hadronFlavour[i]) == 5) {
+      b_btagweight *= m_btagSF.eval_auto_bounds("central", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
+      b_jes_up *= m_btagSF.eval_auto_bounds("up_jes", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
+      b_jes_dn *= m_btagSF.eval_auto_bounds("down_jes", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
+      b_lf_up *= m_btagSF.eval_auto_bounds("up_lf", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
+      b_lf_dn *= m_btagSF.eval_auto_bounds("down_lf", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
+      b_hfstats1_up *= m_btagSF.eval_auto_bounds("up_hfstats1", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
+      b_hfstats1_dn *= m_btagSF.eval_auto_bounds("down_hfstats1", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
+      b_hfstats2_up *= m_btagSF.eval_auto_bounds("up_hfstats2", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
+      b_hfstats2_dn *= m_btagSF.eval_auto_bounds("down_hfstats2", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
+    } else if (abs(Jet_hadronFlavour[i]) == 4) {
+      b_btagweight *= m_btagSF.eval_auto_bounds("central", BTagEntry::FLAV_C, Jet_eta[i], Jet_pt[i]);
+      b_jes_up *= m_btagSF.eval_auto_bounds("up_jes", BTagEntry::FLAV_C, Jet_eta[i], Jet_pt[i]);
+      b_jes_dn *= m_btagSF.eval_auto_bounds("down_jes", BTagEntry::FLAV_C, Jet_eta[i], Jet_pt[i]);
+      b_cferr1_up *= m_btagSF.eval_auto_bounds("up_cferr1", BTagEntry::FLAV_C, Jet_eta[i], Jet_pt[i]);
+      b_cferr1_dn *= m_btagSF.eval_auto_bounds("down_cferr1", BTagEntry::FLAV_C, Jet_eta[i], Jet_pt[i]);
+      b_cferr2_up *= m_btagSF.eval_auto_bounds("up_cferr2", BTagEntry::FLAV_C, Jet_eta[i], Jet_pt[i]);
+      b_cferr2_dn *= m_btagSF.eval_auto_bounds("down_cferr2", BTagEntry::FLAV_C, Jet_eta[i], Jet_pt[i]);
+    } else {
+      b_btagweight *= m_btagSF.eval_auto_bounds("central", BTagEntry::FLAV_UDSG, Jet_eta[i], Jet_pt[i]);
+      b_jes_up *= m_btagSF.eval_auto_bounds("up_jes", BTagEntry::FLAV_UDSG, Jet_eta[i], Jet_pt[i]);
+      b_jes_dn *= m_btagSF.eval_auto_bounds("down_jes", BTagEntry::FLAV_UDSG, Jet_eta[i], Jet_pt[i]);
+      b_hf_up *= m_btagSF.eval_auto_bounds("up_hf", BTagEntry::FLAV_UDSG, Jet_eta[i], Jet_pt[i]);
+      b_hf_dn *= m_btagSF.eval_auto_bounds("down_hf", BTagEntry::FLAV_UDSG, Jet_eta[i], Jet_pt[i]);
+      b_lfstats1_up *= m_btagSF.eval_auto_bounds("up_lfstats1", BTagEntry::FLAV_UDSG, Jet_eta[i], Jet_pt[i]);
+      b_lfstats1_dn *= m_btagSF.eval_auto_bounds("down_lfstats1", BTagEntry::FLAV_UDSG, Jet_eta[i], Jet_pt[i]);
+      b_lfstats2_up *= m_btagSF.eval_auto_bounds("up_lfstats2", BTagEntry::FLAV_UDSG, Jet_eta[i], Jet_pt[i]);
+      b_lfstats2_dn *= m_btagSF.eval_auto_bounds("down_lfstats2", BTagEntry::FLAV_UDSG, Jet_eta[i], Jet_pt[i]);
+    }
   }
   return jets;
 }
@@ -644,9 +695,6 @@ vector<TParticle> h2muAnalysis::JetSelection(vector<TParticle> Muons, vector<TPa
 vector<TParticle> h2muAnalysis::BJetSelection(vector<TParticle> Muons, vector<TParticle> Elecs)
 {
   vector<TParticle> bJets;
-  b_btagweight = 1.0;
-  b_btagweight_up = 1.0;
-  b_btagweight_dn = 1.0;
   for (UInt_t i = 0; i < nJet; i++) {
     if (Jet_btagCSVV2[i] < 0.8484) continue;
     if (Jet_pt[i] < 20) continue;
@@ -663,9 +711,6 @@ vector<TParticle> h2muAnalysis::BJetSelection(vector<TParticle> Muons, vector<TP
     b_bJet_tlv.push_back(mom);
     bJets.push_back(bjet);
     b_CSVv2.push_back(Jet_btagCSVV2[i]);
-    b_btagweight *= m_btagSF.eval_auto_bounds("central", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
-    b_btagweight_up *= m_btagSF.eval_auto_bounds("up", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
-    b_btagweight_dn *= m_btagSF.eval_auto_bounds("down", BTagEntry::FLAV_B, Jet_eta[i], Jet_pt[i]);
   }
   return bJets;
 }
@@ -714,9 +759,9 @@ Double_t h2muAnalysis::roccoR(TLorentzVector m, int &q, int &nGen, int &nTracker
   } else {
     if (nGen > -1) {
       return m_rocCor->kScaleFromGenMC(q, m.Pt(), m.Eta(), m.Phi(),
-				       nTrackerLayers, GenPart_pt[nGen],
-				       u1, 0, 0);
+               nTrackerLayers, GenPart_pt[nGen],
+               u1, 0, 0);
     } else return m_rocCor->kScaleAndSmearMC(q, m.Pt(), m.Eta(), m.Phi(),
-	        			     nTrackerLayers, u1, u2, 0, 0);
+                     nTrackerLayers, u1, u2, 0, 0);
   }
 }

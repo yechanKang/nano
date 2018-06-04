@@ -41,6 +41,8 @@ float pileUpTool::getWeight(int nTrueInt, int sys)
 };
 
 
+// https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFastSimPileUp
+
 const std::vector<float> pileUpTool::Moriond17MC = {
   1.78653e-05,2.56602e-05,5.27857e-05,8.88954e-05,0.000109362,
   0.000140973,0.000240998,0.00071209 ,0.00130121 ,0.00245255 ,

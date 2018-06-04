@@ -27,6 +27,15 @@ private:
   Float_t b_puweight, b_puweight_up, b_puweight_dn; 
   Float_t b_mueffweight, b_mueffweight_up, b_mueffweight_dn;
   Float_t b_btagweight, b_btagweight_up, b_btagweight_dn;
+  Float_t b_jes_up, b_jes_dn;
+  Float_t b_hf_up, b_hf_dn;
+  Float_t b_lf_up, b_lf_dn;
+  Float_t b_hfstats1_up, b_hfstats1_dn;
+  Float_t b_lfstats1_up, b_lfstats1_dn;
+  Float_t b_hfstats2_up, b_hfstats2_dn;
+  Float_t b_lfstats2_up, b_lfstats2_dn;
+  Float_t b_cferr1_up, b_cferr1_dn;
+  Float_t b_cferr2_up, b_cferr2_dn;
 
   Int_t b_Event_No, b_Event_Total;
 
@@ -102,6 +111,7 @@ h2muAnalysis::h2muAnalysis(TTree *tree, Bool_t isMC) : nanoAnalysis(tree, isMC)
 
 h2muAnalysis::~h2muAnalysis()
 {
+  delete m_rocCor;
 }
 
 #endif

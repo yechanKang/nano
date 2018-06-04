@@ -45,6 +45,10 @@ lumiTool::lumiTool(string fileName)
   file.close();
 }
 
+lumiTool::~lumiTool()
+{
+}
+
 Bool_t lumiTool::LumiCheck(UInt_t run, UInt_t luminosityBlock){
   if (lumiMap.find(run) == lumiMap.end()) {
     return false;

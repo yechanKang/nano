@@ -11,6 +11,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <iostream>
 
 // Header file for the classes stored in the TTree if any.
 
@@ -2027,12 +2028,8 @@ Events::Events(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/xrootd/store/group/nanoAOD/run2_2016v4/tsw/nanoAOD_1.root");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("/xrootd/store/group/nanoAOD/run2_2016v4/tsw/nanoAOD_1.root");
-      }
-      f->GetObject("Events",tree);
-
+     std::cerr << "TTree is null!!!!!!!!!!!!\n";
+     throw;
    }
    Init(tree);
 }
