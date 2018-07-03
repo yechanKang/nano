@@ -22,6 +22,14 @@ public :
    TTree          *ht_fChain;
    Int_t           fCurrent; //!current Tree number in a TChain
 
+   UInt_t          h_run;
+   UInt_t          h_luminosityBlock;
+   ULong64_t       h_event;
+
+   UInt_t          ht_run;
+   UInt_t          ht_luminosityBlock;
+   UInt_t          ht_event;
+
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
    // Declaration of leaf types
@@ -111,6 +119,7 @@ public :
    Int_t           GenPart_genPartIdxMother[105];   //[nGenPart]
    Int_t           GenPart_pdgId[105];   //[nGenPart]
    Int_t           GenPart_status[105];   //[nGenPart]
+   Int_t           GenPart_statusFlags[105];   //[nGenPart00]
    Float_t         Generator_x1;
    Float_t         Generator_x2;
    UInt_t          nGenVisTau;
@@ -1114,6 +1123,7 @@ public :
    TBranch        *b_GenPart_genPartIdxMother;   //!
    TBranch        *b_GenPart_pdgId;   //!
    TBranch        *b_GenPart_status;   //!
+   TBranch        *b_GenPart_statusFlags;   //!
    TBranch        *b_Generator_x1;   //!
    TBranch        *b_Generator_x2;   //!
    TBranch        *b_nGenVisTau;   //!
@@ -2062,12 +2072,38 @@ Events::~Events()
    if (ht_fChain) delete ht_fChain->GetCurrentFile();
 }
 
+#include<iostream>
+
 Int_t Events::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
-   return fChain->GetEntry(entry);
+   auto out = fChain->GetEntry(entry);
+
+   if (h_fChain && h_fChain != fChain) {
+     h_fChain->GetEntry(entry);
+     if (h_event != event || h_run != run || h_luminosityBlock != luminosityBlock) {
+       std::cerr << "[ ERR ] Events::GetEntry(Long64_t) : had chain and nano chain out of sync! "
+		 << "\n . Had chain (ev, run, lumi) : " << h_event << " " << h_run <<  " " << h_luminosityBlock
+		 << "\n . Nan chain (ev, run, lumi) : " << event << " " << run <<  " " << luminosityBlock
+		 << std::endl;
+       exit(12);
+     }
+   }
+   if (ht_fChain && ht_fChain != fChain && ht_fChain != h_fChain) {
+     ht_fChain->GetEntry(entry);
+     if (ht_event != event || ht_run != run || ht_luminosityBlock != luminosityBlock) {
+       std::cerr << "[ ERR ] Events::GetEntry(Long64_t) : hdt chain and nano chain out of sync!"
+		 << "\n . Hdt chain (ev, run, lumi) : " << ht_event << " " << ht_run <<  " " << ht_luminosityBlock
+		 << "\n . Nan chain (ev, run, lumi) : " << event << " " << run <<  " " << luminosityBlock
+		 << std::endl;
+       exit(13);
+     }
+   }
+
+   return out;
 }
+
 Long64_t Events::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
@@ -2185,6 +2221,7 @@ void Events::Init(TTree *tree, TTree *had, TTree *hadTruth)
    fChain->SetBranchAddress("GenPart_genPartIdxMother", GenPart_genPartIdxMother, &b_GenPart_genPartIdxMother);
    fChain->SetBranchAddress("GenPart_pdgId", GenPart_pdgId, &b_GenPart_pdgId);
    fChain->SetBranchAddress("GenPart_status", GenPart_status, &b_GenPart_status);
+   fChain->SetBranchAddress("GenPart_statusFlags", GenPart_statusFlags, &b_GenPart_statusFlags);
    fChain->SetBranchAddress("Generator_x1", &Generator_x1, &b_Generator_x1);
    fChain->SetBranchAddress("Generator_x2", &Generator_x2, &b_Generator_x2);
    fChain->SetBranchAddress("nGenVisTau", &nGenVisTau, &b_nGenVisTau);
@@ -3045,7 +3082,14 @@ void Events::Init(TTree *tree, TTree *had, TTree *hadTruth)
    fChain->SetBranchAddress("Flag_trkPOG_toomanystripclus53X", &Flag_trkPOG_toomanystripclus53X, &b_Flag_trkPOG_toomanystripclus53X);
    fChain->SetBranchAddress("Flag_trkPOG_logErrorTooManyClusters", &Flag_trkPOG_logErrorTooManyClusters, &b_Flag_trkPOG_logErrorTooManyClusters);
    fChain->SetBranchAddress("Flag_METFilters", &Flag_METFilters, &b_Flag_METFilters);
+
+   nhad = 0;
    if (h_fChain) {
+     if (h_fChain != fChain) {
+       h_fChain->SetBranchAddress("event", &h_event);
+       h_fChain->SetBranchAddress("run", &h_run);
+       h_fChain->SetBranchAddress("luminosityBlock", &h_luminosityBlock);
+     }
      h_fChain->SetBranchAddress("nhad_jet", &nhad_jet, &b_nhad_jet);
      h_fChain->SetBranchAddress("had_jet_btagCMVA", had_jet_btagCMVA, &b_had_jet_btagCMVA);
      h_fChain->SetBranchAddress("had_jet_btagCSVV2", had_jet_btagCSVV2, &b_had_jet_btagCSVV2);
@@ -3092,7 +3136,13 @@ void Events::Init(TTree *tree, TTree *had, TTree *hadTruth)
      h_fChain->SetBranchAddress("had_ndof", had_ndof, &b_had_ndof);
      h_fChain->SetBranchAddress("had_pdgId", had_pdgId, &b_had_pdgId);
    }
+   
    if (ht_fChain) {
+     if (ht_fChain != h_fChain) {
+       ht_fChain->SetBranchAddress("event", &ht_event);
+       ht_fChain->SetBranchAddress("run", &ht_run);
+       ht_fChain->SetBranchAddress("luminosityBlock", &ht_luminosityBlock);
+     }
      ht_fChain->SetBranchAddress("nhadTruth", &nhadTruth, &b_nhadTruth);
      ht_fChain->SetBranchAddress("hadTruth_nMatched", hadTruth_nMatched, &b_hadTruth_nMatched);
      ht_fChain->SetBranchAddress("hadTruth_nTrueDau", hadTruth_nTrueDau, &b_hadTruth_nTrueDau);
@@ -3103,6 +3153,7 @@ void Events::Init(TTree *tree, TTree *had, TTree *hadTruth)
      ht_fChain->SetBranchAddress("hadTruth_isHadFromC", hadTruth_isHadFromC, &b_hadTruth_isHadFromC);
      ht_fChain->SetBranchAddress("hadTruth_isHadFromB", hadTruth_isHadFromB, &b_hadTruth_isHadFromB);
    }
+
    Notify();
 }
 
